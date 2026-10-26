@@ -1,0 +1,6 @@
+{
+  "name": "بوابة عائلة البكري الرسمية",
+  "description": "الموقع الرسمي لعائلة البكري: شجرة النسب، دليل الأفراد، الأخبار والفعاليات، الأرشيف التاريخي، وصندوق العائلة مع لوحة تحكم CMS شاملة لإدارة المحتوى.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

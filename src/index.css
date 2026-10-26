@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-tajawal: 'Tajawal', system-ui, -apple-system, sans-serif;
+    --font-cairo: 'Cairo', system-ui, -apple-system, sans-serif;
+    --font-amiri: 'Amiri', serif;
+  }
+
+  body {
+    font-family: var(--font-tajawal);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    direction: rtl;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: var(--font-cairo);
+  }
+
+  .font-heritage {
+    font-family: var(--font-amiri);
+  }
+}
+
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(168, 162, 158, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 113, 108, 0.6);
+}
+
+/* Print Styles for family documents and financial reports */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppProvider, useApp } from './context/AppContext';
+import { AppProvider, useApp, isAuthorizedAdmin } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ToastContainer } from './components/common/ToastContainer';
@@ -20,7 +20,7 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AlertCircle, Wrench } from 'lucide-react';
 
 function AppContent() {
-  const { activeView, data, currentRole, loading } = useApp();
+  const { activeView, data, currentRole, currentUser, loading } = useApp();
 
   if (loading) {
     return (
@@ -71,7 +71,7 @@ function AppContent() {
             {activeView === 'archive' && <DocumentsView />}
             {activeView === 'fund' && <FamilyFundView />}
             {activeView === 'page' && <CustomPageView />}
-            {activeView === 'admin' && <AdminDashboard />}
+            {activeView === 'admin' && (isAuthorizedAdmin(currentUser) ? <AdminDashboard /> : <HomeView />)}
           </>
         )}
       </main>

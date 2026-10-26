@@ -210,39 +210,15 @@ export const AdminDashboard: React.FC = () => {
     reader.readAsText(file);
   };
 
-  // Strictly block anyone who is not majed1 or majed2
+  // Strictly block anyone who is not an authorized admin (majed1 or majed2)
+  useEffect(() => {
+    if (!isAuthorizedAdmin(currentUser)) {
+      setActiveView('home');
+    }
+  }, [currentUser, setActiveView]);
+
   if (!isAuthorizedAdmin(currentUser)) {
-    return (
-      <div className="bg-stone-900 border border-stone-800 rounded-3xl p-8 sm:p-12 text-center max-w-xl mx-auto my-12 space-y-6 shadow-2xl animate-in fade-in">
-        <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto">
-          <Shield className="w-8 h-8" />
-        </div>
-        <div>
-          <h2 className="text-xl font-heading font-bold text-stone-100">
-            منطقة محظورة - لوحة التحكم الإدارية
-          </h2>
-          <p className="text-xs text-stone-400 mt-2 leading-relaxed">
-            لوحة التحكم CMS مخصصة فقط لمديري النظام المعتمدين (<span className="text-amber-400 font-bold font-mono">majed1</span> و <span className="text-amber-400 font-bold font-mono">majed2</span>).
-            <br />
-            تصفح الموقع متاح للجميع، ولكن الوصول إلى أدوات الإدارة والتعديل محصور بهذين الحسابين فقط.
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <button
-            onClick={() => setActiveView('home')}
-            className="w-full sm:w-auto px-5 py-2.5 bg-stone-800 hover:bg-stone-750 text-stone-200 rounded-xl text-xs font-semibold transition-colors"
-          >
-            العودة للموقع العام
-          </button>
-          <button
-            onClick={() => setIsLoginModalOpen(true)}
-            className="w-full sm:w-auto px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 rounded-xl text-xs font-bold transition-all shadow-md"
-          >
-            تسجيل دخول الإدارة (Admin)
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

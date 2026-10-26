@@ -104,14 +104,15 @@ async function startServer() {
       return res.json({ user: GUEST_USER, role: GUEST_ROLE });
     }
     const role = db.roles.find(r => r.id === activeUser.roleId) || db.roles[0];
-    res.json({ user: activeUser, role });
+    const { password: _, ...safeUser } = activeUser;
+    res.json({ user: safeUser, role });
   });
 
-  // Guard middleware: strictly allow only majed1 and majed2 to perform administrative actions
+  // Guard middleware: strictly allow only authorized admins to perform administrative actions
   const requireAdmin = (req: Request, res: Response, next: () => void) => {
     if (!isAuthorizedAdmin(activeUser)) {
       return res.status(403).json({
-        error: 'غير مصرح: لوحة التحكم والتعديلات الإدارية محصورة فقط بالمديرين المعتمدين (majed1 و majed2).'
+        error: 'غير مصرح: هذا الإجراء يتطلب صلاحيات إدارية خاصة.'
       });
     }
     next();
@@ -126,25 +127,27 @@ async function startServer() {
     // Check Admin 1: majed1 (password 2468)
     if (identifier === 'majed1' || identifier === 'majed1@albakri.org') {
       if (pwd !== '2468') {
-        return res.status(401).json({ error: 'كلمة المرور غير صحيحة للمدير majed1' });
+        return res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة.' });
       }
       const adminUser = db.users.find(u => u.username === 'majed1' || u.id === 'usr-admin1') || db.users[0];
       activeUser = adminUser;
-      addAuditLog('login', 'settings', `تسجيل دخول ناجح للمدير الأول: ${adminUser.name}`);
+      addAuditLog('login', 'settings', `تسجيل دخول ناجح للمدير: ${adminUser.name}`);
       const role = db.roles.find(r => r.id === activeUser.roleId) || db.roles[0];
-      return res.json({ success: true, user: activeUser, role });
+      const { password: _, ...safeUser } = activeUser;
+      return res.json({ success: true, user: safeUser, role });
     }
 
     // Check Admin 2: majed2 (password 13579)
     if (identifier === 'majed2' || identifier === 'majed2@albakri.org') {
       if (pwd !== '13579') {
-        return res.status(401).json({ error: 'كلمة المرور غير صحيحة للمدير majed2' });
+        return res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة.' });
       }
       const adminUser = db.users.find(u => u.username === 'majed2' || u.id === 'usr-admin2') || db.users[1] || db.users[0];
       activeUser = adminUser;
-      addAuditLog('login', 'settings', `تسجيل دخول ناجح للمدير الثاني: ${adminUser.name}`);
+      addAuditLog('login', 'settings', `تسجيل دخول ناجح للمدير: ${adminUser.name}`);
       const role = db.roles.find(r => r.id === activeUser.roleId) || db.roles[0];
-      return res.json({ success: true, user: activeUser, role });
+      const { password: _, ...safeUser } = activeUser;
+      return res.json({ success: true, user: safeUser, role });
     }
 
     // Check in database users list
@@ -158,12 +161,13 @@ async function startServer() {
         return res.status(403).json({ error: 'الحساب معطل حالياً، يرجى مراجعة إدارة العائلة.' });
       }
       if (user.password && pwd && user.password !== pwd) {
-        return res.status(401).json({ error: 'كلمة المرور غير صحيحة' });
+        return res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة.' });
       }
       activeUser = user;
       addAuditLog('login', 'settings', `تسجيل دخول ناجح للمستخدم: ${user.name}`);
       const role = db.roles.find(r => r.id === activeUser.roleId) || db.roles[0];
-      return res.json({ success: true, user: activeUser, role });
+      const { password: _, ...safeUser } = activeUser;
+      return res.json({ success: true, user: safeUser, role });
     }
 
     // Fallback for general testing emails
@@ -172,21 +176,23 @@ async function startServer() {
       activeUser = adminUser;
       addAuditLog('login', 'settings', `تسجيل دخول الإدارة: ${activeUser.name}`);
       const role = db.roles.find(r => r.id === activeUser.roleId) || db.roles[0];
-      return res.json({ success: true, user: activeUser, role });
+      const { password: _, ...safeUser } = activeUser;
+      return res.json({ success: true, user: safeUser, role });
     }
 
     return res.status(401).json({ error: 'اسم المستخدم أو كلمة المرور غير صحيحة.' });
   });
 
-  // Quick Switch User (Dev & Demo evaluation helper)
-  app.post('/api/auth/switch-user', (req, res) => {
+  // Switch User (restricted to admin)
+  app.post('/api/auth/switch-user', requireAdmin, (req, res) => {
     const { userId } = req.body;
     const target = db.users.find(u => u.id === userId);
     if (target) {
       activeUser = target;
       addAuditLog('login', 'users', `تبديل جلسة العمل إلى: ${target.name} (${target.roleName})`);
       const role = db.roles.find(r => r.id === activeUser.roleId) || db.roles[0];
-      return res.json({ success: true, user: activeUser, role });
+      const { password: _, ...safeUser } = activeUser;
+      return res.json({ success: true, user: safeUser, role });
     }
     return res.status(404).json({ error: 'المستخدم غير موجود' });
   });
@@ -223,10 +229,24 @@ async function startServer() {
     res.json({ success: true, request: newReq });
   });
 
-  // Get full database (sanitized based on role)
+  // Get database (Users and audit logs are strictly hidden from non-admins)
   app.get('/api/data', (req, res) => {
-    // Return all data
-    res.json(db);
+    if (isAuthorizedAdmin(activeUser)) {
+      // For authorized admin: return db with sanitized user passwords
+      const safeUsers = db.users.map(u => {
+        const { password: _, ...rest } = u;
+        return rest;
+      });
+      return res.json({ ...db, users: safeUsers });
+    }
+
+    // For public guests and non-admins: users and logs are completely hidden
+    const publicSafeDb = {
+      ...db,
+      users: [],
+      auditLogs: [],
+    };
+    res.json(publicSafeDb);
   });
 
   // --- Members & Tree Management ---
@@ -920,7 +940,7 @@ async function startServer() {
   });
 
   // Backup & Restore
-  app.get('/api/backup', (req, res) => {
+  app.get('/api/backup', requireAdmin, (req, res) => {
     addAuditLog('export', 'settings', 'تصدير نسخة احتياطية كاملة من قاعدة بيانات النظام');
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="albakri_backup_${Date.now()}.json"`);

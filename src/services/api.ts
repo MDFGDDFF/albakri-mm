@@ -93,10 +93,10 @@ export const api = {
 
       // Check majed1 / majed2 local fallback
       if (idf === 'majed1' && pwd !== '2468') {
-        return { success: false, error: 'كلمة المرور غير صحيحة للمدير majed1' };
+        return { success: false, error: 'اسم المستخدم أو كلمة المرور غير صحيحة' };
       }
       if (idf === 'majed2' && pwd !== '13579') {
-        return { success: false, error: 'كلمة المرور غير صحيحة للمدير majed2' };
+        return { success: false, error: 'اسم المستخدم أو كلمة المرور غير صحيحة' };
       }
 
       const user = local.users.find(u => 

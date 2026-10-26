@@ -1401,6 +1401,26 @@
   ],
   "auditLogs": [
     {
+      "id": "log-1793008188528-0iq5",
+      "timestamp": "2026-10-26T09:49:48.528Z",
+      "userId": "usr-admin1",
+      "userName": "ماجد 1 (المدير الأول)",
+      "userRole": "مدير النظام",
+      "action": "logout",
+      "entity": "settings",
+      "details": "تسجيل خروج: ماجد 1 (المدير الأول)"
+    },
+    {
+      "id": "log-1793008183718-dtio",
+      "timestamp": "2026-10-26T09:49:43.718Z",
+      "userId": "usr-admin1",
+      "userName": "ماجد 1 (المدير الأول)",
+      "userRole": "مدير النظام",
+      "action": "login",
+      "entity": "settings",
+      "details": "تسجيل دخول ناجح للمدير: ماجد 1 (المدير الأول)"
+    },
+    {
       "id": "log-1",
       "timestamp": "2026-10-25T13:45:10.000Z",
       "userId": "usr-admin",

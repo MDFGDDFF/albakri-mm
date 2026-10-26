@@ -174,7 +174,7 @@ export const Footer: React.FC = () => {
               </button>
             ))}
             <span className="text-stone-700">|</span>
-            <span className="text-stone-500">نظام إدارة المحتوى CMS v2.4</span>
+            <span className="text-stone-500">بوابة عائلة البكري والبقري الموحدة</span>
           </div>
         </div>
       </div>
